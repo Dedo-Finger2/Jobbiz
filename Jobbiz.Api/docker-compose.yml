@@ -1,0 +1,42 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: jobbiz-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: jobbiz
+      POSTGRES_PASSWORD: your_secret_password
+      POSTGRES_DB: jobbiz_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/initdb.d:/docker-entrypoint-initdb.d  <-- Adicione esta linha
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobbiz -d jobbiz_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: jobbiz-pgadmin
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: your_email@example.com
+      PGADMIN_DEFAULT_PASSWORD: your_pgadmin_password
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+  pgadmin_data:
